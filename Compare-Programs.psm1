@@ -15,38 +15,35 @@ function Compare-Software {
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [Alias('CN','Computer')]
         [String[]]
-        $Computers,
+        $ComputerName,
 
         [switch]
         $PSexec
     )
 
-    begin{
-        $location = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
-        $command = {(Get-ChildItem -Path $location |
+    begin{ 
+        
+        $command = {(Get-ChildItem -Path "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" |
             Get-ItemProperty -Name DisplayName -ErrorAction SilentlyContinue).DisplayName |
             Sort-object}
-
+        
         $master = Invoke-Command $command
     }
 
     process{
-        $data = foreach ($Computer in $Computers){
+        
+        $data = foreach ($Computer in $ComputerName){
             Write-Debug $Computer
             
             if($PSexec){
-                                
-                $remote = .\PsExec64.exe \\$Computer /accepteula /nobanner powershell $command
-               
-                #Write-Error "Failure the Connect to $computer. Please check to see is $computer exists or is online"
-                
+                $remote = .\PsExec64.exe \\$Computer /accepteula /nobanner powershell $command.ToString()
             }else{
-                $remote = Invoke-Command -ComputerName $Computer -ScriptBlock $command          
+                $remote = Invoke-Command -ComputerName $Computer -ScriptBlock $element        
             }
 
-            $out = Compare-Object $master $remote
+            $Comparison = Compare-Object $master $remote
             
-            $output = forEach($item in $out){
+            $output = forEach($item in $Comparison){
                 write-debug $item
                 if(($item.SideIndicator) -eq "=>"){
                     $item.InputObject
