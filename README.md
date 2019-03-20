@@ -12,3 +12,5 @@ Function Compare-Software
   
   Outputs: 
     An Array of CustomPSobjects containing The ComputerName and an array of all the diffenet programs
+
+TODO: Break it up a bit more function wise
