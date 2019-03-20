@@ -15,7 +15,7 @@ function Compare-Software {
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [Alias('CN','Computer')]
         [String[]]
-        $ComputerName,
+        $Computers,
 
         [switch]
         $PSexec
@@ -23,47 +23,41 @@ function Compare-Software {
 
     begin{
         $location = "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
-        
-        $master = (Get-ChildItem -Path $location | Get-ItemProperty -Name DisplayName -ErrorAction SilentlyContinue).DisplayName | sort
+        $command = {(Get-ChildItem -Path $location |
+            Get-ItemProperty -Name DisplayName -ErrorAction SilentlyContinue).DisplayName |
+            Sort-object}
+
+        $master = Invoke-Command $command
     }
 
     process{
-        #$data = New-Object Collections.Generic.List[object[]]
-        $data = foreach ($Computer in $ComputerName){
+        $data = foreach ($Computer in $Computers){
             Write-Debug $Computer
             
             if($PSexec){
-                $text = "(Get-ChildItem -Path $location |
-                          Get-ItemProperty -Name DisplayName -ErrorAction SilentlyContinue).DisplayName | sort"
-                
-                $remote = .\PsExec64.exe \\$Computer /accepteula /nobanner powershell $text
+                                
+                $remote = .\PsExec64.exe \\$Computer /accepteula /nobanner powershell $command
                
                 #Write-Error "Failure the Connect to $computer. Please check to see is $computer exists or is online"
                 
             }else{
-                $remote = Invoke-Command -ComputerName $Computer -ScriptBlock{
-                                (Get-ChildItem -Path $location |
-                                Get-ItemProperty -Name DisplayName -ErrorAction SilentlyContinue).DisplayName} |sort               
+                $remote = Invoke-Command -ComputerName $Computer -ScriptBlock $command          
             }
+
             $out = Compare-Object $master $remote
             
-            
-            
             $output = forEach($item in $out){
-                        write-debug $item
-                        if(($item.SideIndicator) -eq "=>"){
-                            $item.InputObject
-                        }
+                write-debug $item
+                if(($item.SideIndicator) -eq "=>"){
+                    $item.InputObject
+                }            
+            }
 
-                        
-                    }
             [PSCustomObject]@{
                 ComputerName = $Computer
                 Programs = $output
-            }
-            
-            
-       }
+            }       
+        }
     }
     
     end{
