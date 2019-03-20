@@ -5,11 +5,17 @@ function Compare-Software {
     Compares and displays all software listed in the registry compared to the current Computer.
 
     .DESCRIPTION
-    Uses the SOFTWARE registry keys (both 32 and 64bit) to list the name,or each software entry on a given computer.
+    Uses the SOFTWARE registry keys (both 32 and 64bit) to list the name, or each software entry on a given computer.
 
     .EXAMPLE
     C:\PS> Compare-Software -ComputerName SERVER1
-    This shows the software installed on SERVER1.
+    This shows the software installed on SERVER1 compared to the current computer.
+    
+    .EXAMPLE
+    C:\PS> Compare-Software -ComputerName SERVER1 -PSexec
+    This shows the software installed on SERVER1 compared to the current computer, 
+    Uses PSexec to run command and not WinRM
+
     #>
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
