@@ -5,11 +5,17 @@ function Compare-Software {
     Compares and displays all software listed in the registry compared to the current Computer.
 
     .DESCRIPTION
-    Uses the SOFTWARE registry keys (both 32 and 64bit) to list the name,or each software entry on a given computer.
+    Uses the SOFTWARE registry keys (both 32 and 64bit) to list the name, or each software entry on a given computer.
 
     .EXAMPLE
     C:\PS> Compare-Software -ComputerName SERVER1
-    This shows the software installed on SERVER1.
+    This shows the software installed on SERVER1 compared to the current computer.
+    
+    .EXAMPLE
+    C:\PS> Compare-Software -ComputerName SERVER1 -PSexec
+    This shows the software installed on SERVER1 compared to the current computer, 
+    Uses PSexec to run command and not WinRM
+
     #>
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
@@ -33,7 +39,8 @@ function Compare-Software {
                         "Microsoft ReportViewer",
                         "Chipset Device Software",
                         "Trusted Connect Service",
-                        "Dropbox Update Helper")
+                        "Dropbox Update Helper",
+                        "Spirion")
         $command = {(Get-ChildItem -Path "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" |
             Get-ItemProperty -Name DisplayName -ErrorAction SilentlyContinue).DisplayName |
             Sort-object}
@@ -52,7 +59,7 @@ function Compare-Software {
                 $remote = Invoke-Command -ComputerName $Computer -ScriptBlock $element        
             }
 
-            $Comparison = Compare-Object $master $remote
+            $Comparison = Compare-Object $master $remote 
             
             $output = forEach($item in $Comparison){
                 write-debug $item
