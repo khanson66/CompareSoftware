@@ -39,7 +39,8 @@ function Compare-Software {
                         "Microsoft ReportViewer",
                         "Chipset Device Software",
                         "Trusted Connect Service",
-                        "Dropbox Update Helper")
+                        "Dropbox Update Helper",
+                        "Spirion")
         $command = {(Get-ChildItem -Path "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" |
             Get-ItemProperty -Name DisplayName -ErrorAction SilentlyContinue).DisplayName |
             Sort-object}
@@ -58,7 +59,7 @@ function Compare-Software {
                 $remote = Invoke-Command -ComputerName $Computer -ScriptBlock $element        
             }
 
-            $Comparison = Compare-Object $master $remote
+            $Comparison = Compare-Object $master $remote 
             
             $output = forEach($item in $Comparison){
                 write-debug $item
