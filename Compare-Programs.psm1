@@ -1,5 +1,4 @@
-
-class FilterSettings {
+<#class FilterSettings {
     # Property: Holds name
     [String[]] $IgnoreList
 
@@ -32,8 +31,22 @@ class FilterSettings {
         return $this.IgnoreList
     }
 }
-$Filterlist = [FilterSettings]::new()
+$Filterlist = [FilterSettings]::new()#>
 
+function get-FilterList{
+    @("AMD Settings", 
+        "Microsoft Visual",
+        "System Center Configuration Manager Console",
+        "CCC Help",
+        "Catalyst Control Center",
+        "AMD Catalyst Control Center",
+        "Microsoft VC",
+        "Microsoft ReportViewer",
+        "Chipset Device Software",
+        "Trusted Connect Service",
+        "Dropbox Update Helper",
+        "Spirion")
+}
 function Compare-Software { 
     <#
     .SYNOPSIS 
@@ -54,14 +67,14 @@ function Compare-Software {
     #>
     [CmdletBinding()] 
     param (
-        [Alias('Master','LocalComputer','Main','Origin','Reference')]
+        [Alias('RC','Master','LocalComputer','Main','Origin','Reference')]
         [String]
         $ReferenceComputer = $env:COMPUTERNAME,
 
         [Parameter(Mandatory = $true,
                    ValueFromPipeline = $true,
                    ValueFromPipelineByPropertyName =$true)]
-        [Alias('Remote','RemoteComputer','ComparisonComputer')]
+        [Alias('DC','Remote','RemoteComputer','ComparisonComputer')]
         [String]
         $DifferenceComputer,
 
@@ -80,7 +93,7 @@ function Compare-Software {
             $output = forEach($item in $Comparison){
                 write-debug $item
 
-                if($item.SideIndicator -eq "=>" -and ($item.InputObject -notmatch ($FilterList.GetList() -join "|"))){
+                if($item.SideIndicator -eq "=>" -and ($item.InputObject -notmatch (get-FilterList -join "|"))){
                     $item.InputObject
                 }            
             }
@@ -107,7 +120,11 @@ function Get-Software {
         $ComputerName = $env:COMPUTERNAME,
         
         [switch]
-        $PSexec
+        $PSexec,
+
+        [Alias('filterList','f')]
+        [switch]
+        $filter
     )
     begin {
         $command = {(Get-ChildItem -Path "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" |
@@ -124,10 +141,18 @@ function Get-Software {
         }else{
             $output = Invoke-Command -ComputerName $Computer -ScriptBlock $element
         }
+        if($filter){
+            $output = forEach($item in $output){
+                write-debug $item
+                if($item -notmatch (get-FilterList -join "|")){
+                    $item
+                }            
+            }
+        }
     }
     
     end {
         $output
     }
-}
+} 
 Export-ModuleMember -Function Get-Software
