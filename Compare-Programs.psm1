@@ -1,4 +1,4 @@
- . .\Assets\Glolab-Varibles.ps1
+ . .\Assets\Global-Varibles.ps1
 function Compare-Software { 
     <#
     .SYNOPSIS 
