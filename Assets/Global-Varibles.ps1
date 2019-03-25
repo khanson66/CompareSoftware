@@ -1,0 +1,15 @@
+$Filterlist =@("AMD Settings", 
+                "Microsoft Visual",
+                "Microsoft .NET",
+                "Microsoft VC",
+                "Microsoft_VC",
+                "Microsoft ReportViewer",
+                "System Center Configuration Manager Console",
+                "CCC Help",
+                "Catalyst Control Center",
+                "AMD Catalyst Control Center",
+                "Chipset Device Software",
+                "Trusted Connect Service",
+                "Dropbox Update Helper",
+                "Spirion"
+                )

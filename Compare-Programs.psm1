@@ -1,52 +1,4 @@
-<#class FilterSettings {
-    # Property: Holds name
-    [String[]] $IgnoreList
-
-    # Constructor: Creates a new MyClass object, with the specified name
-    FilterSettings([string[]] $newList) {
-        # Set IgnoreList for FilterSettings
-        $this.IgnoreList = $newList
-    }
-    FilterSettings() {
-        # Set IgnoreList for FilterSettings
-       $this.ChangeListToDefault()
-
-    }
-    # Method: Method that changes $Ignorelist to the default name
-    [void] ChangeListToDefault() {
-        $this.IgnoreList= @("AMD Settings", 
-        "Microsoft Visual",
-        "System Center Configuration Manager Console",
-        "CCC Help",
-        "Catalyst Control Center",
-        "AMD Catalyst Control Center",
-        "Microsoft VC",
-        "Microsoft ReportViewer",
-        "Chipset Device Software",
-        "Trusted Connect Service",
-        "Dropbox Update Helper",
-        "Spirion")
-    }
-    [string[]] GetList(){
-        return $this.IgnoreList
-    }
-}
-$Filterlist = [FilterSettings]::new()#>
-
-function get-FilterList{
-    @("AMD Settings", 
-        "Microsoft Visual",
-        "System Center Configuration Manager Console",
-        "CCC Help",
-        "Catalyst Control Center",
-        "AMD Catalyst Control Center",
-        "Microsoft VC",
-        "Microsoft ReportViewer",
-        "Chipset Device Software",
-        "Trusted Connect Service",
-        "Dropbox Update Helper",
-        "Spirion")
-}
+ . .\Assets\Glolab-Varibles.ps1
 function Compare-Software { 
     <#
     .SYNOPSIS 
@@ -93,7 +45,7 @@ function Compare-Software {
             $output = forEach($item in $Comparison){
                 write-debug $item
 
-                if($item.SideIndicator -eq "=>" -and ($item.InputObject -notmatch (get-FilterList -join "|"))){
+                if($item.SideIndicator -eq "=>" -and ($item.InputObject -notmatch ($Filterlist -join "|"))){
                     $item.InputObject
                 }            
             }
@@ -108,8 +60,6 @@ function Compare-Software {
 }
 Export-ModuleMember -Function Compare-Software
 
-
-
 function Get-Software {
     [CmdletBinding()]
     param (
@@ -122,7 +72,7 @@ function Get-Software {
         [switch]
         $PSexec,
 
-        [Alias('filterList','f')]
+        [Alias('f')]
         [switch]
         $filter
     )
@@ -141,10 +91,11 @@ function Get-Software {
         }else{
             $output = Invoke-Command -ComputerName $Computer -ScriptBlock $element
         }
-        if($filter){
+        if($filter -eq $true){
+            Write-Debug("The filter was activated")
             $output = forEach($item in $output){
                 write-debug $item
-                if($item -notmatch (get-FilterList -join "|")){
+                if($item -notmatch ($Filterlist -join "|")){
                     $item
                 }            
             }
