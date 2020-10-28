@@ -56,7 +56,7 @@ function Compare-Software {
             if($PSexec){
                 $remote = .\PsExec64.exe \\$Computer /accepteula /nobanner powershell $command.ToString()
             }else{
-                $remote = Invoke-Command -ComputerName $Computer -ScriptBlock $element        
+                $remote = Invoke-Command -ComputerName $Computer -ScriptBlock $command        
             }
 
             $Comparison = Compare-Object $master $remote 
